@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <title>Photography Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(45deg, #002642, #111111);
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 10%;
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 25px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .navbar a {
+            font-size: 18px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            margin-left: 35px;
+            transition: .3s;
+        }
+
+        .navbar a:hover,
+        .navbar a.active {
+            color: #ccff00;
+        }
+
+        #menu-icon {
+            font-size: 36px;
+            color: #fff;
+            cursor: pointer;
+            display: none;
+        }
+
+        .sphere {
+            position: fixed;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ccff00, #002642);
+            filter: blur(10px);
+            z-index: 0;
+            opacity: 0.5;
+        }
+
+        #sphere1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            right: -100px;
+            animation: float1 15s infinite ease-in-out;
+        }
+
+        #sphere2 {
+            width: 200px;
+            height: 200px;
+            bottom: -50px;
+            left: -50px;
+            animation: float2 18s infinite ease-in-out;
+        }
+
+        #sphere3 {
+            width: 250px;
+            height: 250px;
+            top: 50%;
+            left: 20%;
+            animation: float3 20s infinite ease-in-out;
+        }
+
+        #sphere4 {
+            width: 180px;
+            height: 180px;
+            bottom: 30%;
+            right: 15%;
+            animation: float4 17s infinite ease-in-out;
+        }
+
+        #sphere5 {
+            width: 220px;
+            height: 220px;
+            top: 30%;
+            right: 40%;
+            animation: float5 22s infinite ease-in-out;
+        }
+
+        .portfolio-container {
+            max-width: 1200px;
+            margin: 100px auto 40px;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .portfolio-title {
+            color: #f2f2f2;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+        }
+
+        .portfolio-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+            justify-content: center;
+        }
+
+        .portfolio-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: fit-content;
+            flex: 1 1 300px;
+        }
+
+        .portfolio-item:nth-child(4n+1) {
+            flex: 2 1 400px;
+        }
+
+        .portfolio-item:nth-child(3n+2) {
+            flex: 0.5 1 200px;
+        }
+
+        .portfolio-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0 20px rgba(204, 255, 0, 0.3),
+                        0 0 40px rgba(204, 255, 0, 0.2),
+                        0 0 60px rgba(204, 255, 0, 0.1);
+            border-color: rgba(204, 255, 0, 0.5);
+        }
+
+        .portfolio-item img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(50px, 100px) rotate(5deg); }
+            50% { transform: translate(-30px, 50px) rotate(-5deg); }
+            75% { transform: translate(80px, -30px) rotate(3deg); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-70px, -50px) rotate(-8deg); }
+            66% { transform: translate(40px, 80px) rotate(8deg); }
+        }
+
+        @keyframes float3 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            30% { transform: translate(60px, -70px) rotate(10deg); }
+            60% { transform: translate(-50px, 60px) rotate(-10deg); }
+        }
+
+        @keyframes float4 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            40% { transform: translate(-40px, 90px) rotate(-15deg); }
+            80% { transform: translate(70px, -40px) rotate(15deg); }
+        }
+
+        @keyframes float5 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            35% { transform: translate(80px, 60px) rotate(12deg); }
+            75% { transform: translate(-60px, -80px) rotate(-12deg); }
+        }
+
+        @media (max-width: 768px) {
+            #menu-icon {
+                display: block;
+            }
+
+            .navbar {
+                position: absolute;
+                top: 100%;
+                right: -100%;
+                width: 200px;
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(10px);
+                border-radius: 10px;
+                padding: 20px;
+                transition: 0.3s ease;
+            }
+
+            .navbar.active {
+                right: 10%;
+            }
+
+            .navbar a {
+                display: block;
+                margin: 15px 0;
+                font-size: 16px;
+            }
+
+            .portfolio-item {
+                flex: 1 1 100% !important;
+            }
+
+            .portfolio-title {
+                font-size: 2em;
+            }
+
+            .sphere {
+                opacity: 0.3;
+            }
+
+            #sphere1, #sphere2, #sphere3, #sphere4, #sphere5 {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="#" class="logo">Logo</a>
+        <i class='bx bx-menu' id="menu-icon"></i>
+        <nav class="navbar">
+            <a href="#" class="active">Home</a>
+            <a href="#">About</a>
+            <a href="portfolio.html">Portfolio</a>
+            <a href="#">Services</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+
+    <div class="sphere" id="sphere1"></div>
+    <div class="sphere" id="sphere2"></div>
+    <div class="sphere" id="sphere3"></div>
+    <div class="sphere" id="sphere4"></div>
+    <div class="sphere" id="sphere5"></div>
+
+    <div class="portfolio-container">
+        <h1 class="portfolio-title">Our Portfolio</h1>
+        
+        <div class="portfolio-grid">
+            <div class="portfolio-item">
+                <img src="images/photo 1.jpg" alt="Nature Photography">
+            </div>
+            <div class="portfolio-item">
+                <img src="images/photo 2.jpg" alt="Urban Photography">
+            </div>
+            <div class="portfolio-item">
+                <img src="images/photo 3.jpg" alt="Portrait Photography">
+            </div>
+            <div class="portfolio-item">
+                <img src="images/photo 4.jpg" alt="Portrait Photography">
+            </div>
+            <div class="portfolio-item">
+                <img src="images/photo 5.jpg" alt="Portrait Photography">
+            </div>
+            <div class="portfolio-item">
+                <img src="images/photo 6.jpg" alt="Portrait Photography">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let menuIcon = document.querySelector('#menu-icon');
+        let navbar = document.querySelector('.navbar');
+
+        menuIcon.onclick = () => {
+            menuIcon.classList.toggle('bx-x');
+            navbar.classList.toggle('active');
+        };
+    </script>
+</body>
+</html>
