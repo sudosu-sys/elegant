@@ -20,19 +20,17 @@ function updateRendererSize() {
 updateRendererSize();
 
 // Configure renderer settings
-renderer.setClearColor(0x000000, 0); // Transparent background
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setClearColor(0x000000, 0);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-// Add renderer to the DOM
 modelContainer.appendChild(renderer.domElement);
 
-// Create a new scene
 const scene = new THREE.Scene();
 scene.background = null;
 
-// Set up lighting
+// Lighting setup
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
@@ -49,7 +47,6 @@ const frontLight = new THREE.DirectionalLight(0xffffff, 1);
 frontLight.position.set(0, 0, 5);
 scene.add(frontLight);
 
-// Add colored point lights for dramatic effect
 const pointLight1 = new THREE.PointLight(0xff9000, 1, 10);
 pointLight1.position.set(2, 2, 2);
 scene.add(pointLight1);
@@ -58,11 +55,11 @@ const pointLight2 = new THREE.PointLight(0x0066ff, 1, 10);
 pointLight2.position.set(-2, 2, -2);
 scene.add(pointLight2);
 
-// Set up camera
+// Camera setup
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
 camera.position.set(4, 5, 11);
 
-// Set up orbit controls
+// Controls setup
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.enablePan = false;
@@ -81,14 +78,23 @@ const mouse = new THREE.Vector2();
 const targetRotation = new THREE.Vector2();
 const currentRotation = new THREE.Vector2();
 const smoothness = 0.1;
+let clock = new THREE.Clock();
+let isMobile = window.innerWidth <= 768;
 
-// Mouse move handler for model interaction
+// Check if device is mobile
+function checkMobile() {
+    return window.innerWidth <= 768;
+}
+
+// Mouse move handler
 function onMouseMove(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
-    
-    targetRotation.x = -mouse.y * 0.5;
-    targetRotation.y = mouse.x * 0.5;
+    if (!isMobile) {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
+        
+        targetRotation.x = -mouse.y * 0.5;
+        targetRotation.y = mouse.x * 0.5;
+    }
 }
 
 document.addEventListener('mousemove', onMouseMove);
@@ -96,19 +102,16 @@ document.addEventListener('mousemove', onMouseMove);
 // Load the 3D model
 const loader = new GLTFLoader().setPath('public/model/');
 loader.load('scene.gltf', 
-    // Success callback
     (gltf) => {
         console.log('loading model');
         modelMesh = gltf.scene;
 
-        // Configure model materials and shadows
         modelMesh.traverse((child) => {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
                 
                 if (child.material) {
-                    // Configure material properties
                     child.material.transparent = false;
                     child.material.opacity = 1;
                     child.material.depthWrite = true;
@@ -122,31 +125,34 @@ loader.load('scene.gltf',
             }
         });
 
-        // Scale and position the model
-        modelMesh.scale.set(30, 30, 30);
-        modelMesh.position.set(5, 0, 0); // Position model to the right
+        // Adjust scale based on device
+        const scale = isMobile ? 20 : 30;
+        modelMesh.scale.set(scale, scale, scale);
+        
+        // Center the model
+        modelMesh.position.set(0, 0, 0);
 
         scene.add(modelMesh);
 
-        // Set up environment mapping
         const pmremGenerator = new THREE.PMREMGenerator(renderer);
         pmremGenerator.compileEquirectangularShader();
         
         const environmentTexture = pmremGenerator.fromScene(new THREE.Scene()).texture;
         scene.environment = environmentTexture;
 
-        // Adjust camera position
-        camera.position.set(8, 4, 8);
+        // Adjust camera position based on device
+        if (isMobile) {
+            camera.position.set(0, 4, 12);
+        } else {
+            camera.position.set(8, 4, 8);
+        }
         controls.update();
 
-        // Hide loading indicator
         document.getElementById('progress-container').style.display = 'none';
     },
-    // Progress callback
     (xhr) => {
         console.log(`loading ${xhr.loaded / xhr.total * 100}%`);
     },
-    // Error callback
     (error) => {
         console.error(error);
     }
@@ -156,13 +162,20 @@ loader.load('scene.gltf',
 function animate() {
     requestAnimationFrame(animate);
     
-    // Update model rotation based on mouse position
     if (modelMesh) {
-        currentRotation.x += (targetRotation.x - currentRotation.x) * smoothness;
-        currentRotation.y += (targetRotation.y - currentRotation.y) * smoothness;
-        
-        modelMesh.rotation.x = currentRotation.x;
-        modelMesh.rotation.y = currentRotation.y;
+        if (isMobile) {
+            // Floating animation for mobile
+            const time = clock.getElapsedTime();
+            modelMesh.position.y = Math.sin(time) * 0.3;
+            modelMesh.rotation.y = time * 0.2;
+        } else {
+            // Mouse-based animation for desktop
+            currentRotation.x += (targetRotation.x - currentRotation.x) * smoothness;
+            currentRotation.y += (targetRotation.y - currentRotation.y) * smoothness;
+            
+            modelMesh.rotation.x = currentRotation.x;
+            modelMesh.rotation.y = currentRotation.y;
+        }
     }
     
     renderer.render(scene, camera);
@@ -170,10 +183,25 @@ function animate() {
 
 // Handle window resize
 window.addEventListener('resize', () => {
+    isMobile = checkMobile();
     updateRendererSize();
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
+    
+    // Update camera position on resize
+    if (modelMesh) {
+        if (isMobile) {
+            camera.position.set(0, 4, 12);
+            modelMesh.scale.set(20, 20, 20);
+            modelMesh.position.set(0, 0, 0);
+        } else {
+            camera.position.set(8, 4, 8);
+            modelMesh.scale.set(30, 30, 30);
+            modelMesh.position.set(0, 0, 0);
+        }
+    }
+    
+    controls.update();
 });
 
-// Start animation loop
 animate();
